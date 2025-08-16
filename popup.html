@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuscaLogo</title>
+  <style>
+    body {
+      width: 350px;
+      min-height: 450px;
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .status-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .status-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .status-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .status-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #45a049;
+      transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #da190b;
+      transform: translateY(-1px);
+    }
+    
+    .btn-capture {
+      background: #2196F3;
+      color: white;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    
+    .btn-capture:hover {
+      background: #1976D2;
+      transform: translateY(-1px);
+    }
+    
+    .btn-capture:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    
+    .stat-label {
+      font-size: 10px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .current-page {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 12px;
+    }
+    
+    .current-page-url {
+      font-weight: 600;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+    
+    .current-page-title {
+      opacity: 0.9;
+      font-style: italic;
+    }
+    
+    .history-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .history-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .history-count {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+    
+    .history-list {
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 11px;
+    }
+    
+    .history-item:last-child {
+      border-bottom: none;
+    }
+    
+    .history-item-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-right: 8px;
+    }
+    
+    .history-item-date {
+      opacity: 0.7;
+      font-size: 10px;
+    }
+    
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.6;
+      margin-top: 16px;
+    }
+    
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    
+    .success-message {
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      text-align: center;
+    }
+    
+    .error-message {
+      background: rgba(244, 67, 54, 0.2);
+      border: 1px solid rgba(244, 67, 54, 0.5);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">🔍 BuscaLogo</div>
+    <div class="subtitle">Buscador Colaborativo P2P</div>
+  </div>
+  
+  <!-- Current Page Info -->
+  <div class="current-page" id="currentPageInfo" style="display: none;">
+    <div class="current-page-url" id="currentPageUrl">-</div>
+    <div class="current-page-title" id="currentPageTitle">-</div>
+  </div>
+  
+  <!-- Capture Button -->
+  <button class="btn btn-capture" id="capturePage" disabled>
+    🔍 Capturar Página Atual
+  </button>
+  
+  <!-- Status Card -->
+                <div class="status-card">
+                <div class="status-row">
+                  <span class="status-label">Status:</span>
+                  <span class="status-value" id="status">Carregando...</span>
+                </div>
+                
+                <div class="status-row">
+                  <span class="status-label">Coleta Manual:</span>
+                  <span class="status-value" id="collectionStatus">-</span>
+                </div>
+                
+                <!-- Status do Servidor -->
+        <div class="status-row">
+          <span class="label">Servidor:</span>
+          <span class="value" id="serverStatus">Desconectado</span>
+        </div>
+        
+        <div class="status-row">
+          <span class="label">Peer ID:</span>
+          <span class="value" id="peerId">-</span>
+        </div>
+        
+        <!-- Status do Crawling -->
+        <div class="status-row">
+          <span class="label">Crawling:</span>
+          <span class="value" id="crawlingStatus">Inativo</span>
+        </div>
+        
+        <div class="status-row">
+          <span class="label">Fila:</span>
+          <span class="value" id="queueStatus">0 itens</span>
+        </div>
+        
+        <!-- Estatísticas do Crawling -->
+        <div class="crawling-stats">
+          <div class="stats-row">
+            <span class="label">Descobertos:</span>
+            <span class="value" id="totalDiscovered">0</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">Capturados:</span>
+            <span class="value" id="totalCaptured">0</span>
+          </div>
+          <div class="stats-row">
+            <span class="label">Falharam:</span>
+            <span class="value" id="totalFailed">0</span>
+          </div>
+        </div>
+              </div>
+  
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn btn-secondary" id="refreshStats">Atualizar</button>
+    <button class="btn btn-info" id="testSearch">Testar Busca</button>
+    <button class="btn btn-danger" id="clearData">Limpar Dados</button>
+  </div>
+  
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="totalPages">-</div>
+      <div class="stat-label">Páginas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="uniqueHosts">-</div>
+      <div class="stat-label">Hosts</div>
+    </div>
+  </div>
+  
+  <!-- History Section -->
+  <div class="history-section">
+    <div class="history-header">
+      <span class="history-title">Histórico de Capturas</span>
+      <span class="history-count" id="historyCount">0</span>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-item">
+        <span class="history-item-title">Nenhuma página capturada</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    v1.0.0 • BuscaLogo.com
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

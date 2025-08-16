@@ -1,0 +1,15 @@
+{
+  "name": "buscalogo-extension",
+  "version": "1.0.0",
+  "description": "Extensão Chrome para BuscaLogo - Buscador Colaborativo P2P",
+  "private": true,
+  "scripts": {
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+  },
+  "devDependencies": {
+    "eslint": "^8.45.0"
+  },
+  "keywords": ["chrome-extension", "webrtc", "p2p", "search"],
+  "author": "BuscaLogo Team",
+  "license": "MIT"
+}
