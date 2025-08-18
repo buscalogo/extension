@@ -36,6 +36,18 @@ class BuscaLogoBackground {
       totalCaptured: 0,
       totalFailed: 0
     };
+    
+    // Sistema de notificações
+    this.notificationSettings = {
+      enabled: true,
+      newPageCaptured: true,
+      crawlingProgress: true,
+      connectionStatus: true,
+      showBadge: true
+    };
+    this.notificationQueue = [];
+    this.badgeCount = 0;
+    
     console.log('✅ Construtor concluído');
     this.init();
   }
@@ -49,10 +61,15 @@ class BuscaLogoBackground {
     console.log('💾 Storage inicializado');
     await this.loadSavedData();
     console.log('📚 Dados carregados');
+    await this.loadNotificationSettings();
+    console.log('🔔 Configurações de notificação carregadas');
     await this.connectToServer();
     console.log('🔗 Tentativa de conexão com servidor iniciada');
     this.setupMessageHandlers();
     console.log('🎯 Handlers de mensagem configurados');
+    
+    // Inicia limpeza automática de notificações
+    setInterval(() => this.clearOldNotifications(), 300000); // A cada 5 minutos
   }
   
   /**
@@ -86,6 +103,9 @@ class BuscaLogoBackground {
         // Inicia sistema de heartbeat
         this.startHeartbeat();
         
+        // Notifica conexão bem-sucedida
+        this.notifyConnectionStatus(true);
+        
         // Envia mensagem de conexão
         this.sendToServer({
           type: 'PEER_CONNECT',
@@ -107,6 +127,10 @@ class BuscaLogoBackground {
         console.log('🔌 Desconectado do servidor central');
         this.isConnectedToServer = false;
         this.stopHeartbeat();
+        
+        // Notifica desconexão
+        this.notifyConnectionStatus(false);
+        
         this.handleServerDisconnection();
       };
       
@@ -474,7 +498,7 @@ class BuscaLogoBackground {
   /**
    * Processa mensagens do Chrome
    */
-  handleChromeMessage(message, sender, sendResponse) {
+  async handleChromeMessage(message, sender, sendResponse) {
     console.log('📨 Mensagem recebida:', message);
     
     try {
@@ -532,6 +556,46 @@ class BuscaLogoBackground {
           }).catch(error => {
             sendResponse({ success: false, error: error.message });
           });
+          return true;
+          
+        case 'GET_NOTIFICATION_SETTINGS':
+          console.log('🔔 Obtendo configurações de notificação...');
+          sendResponse({ success: true, settings: this.notificationSettings });
+          break;
+          
+        case 'UPDATE_NOTIFICATION_SETTINGS':
+          console.log('🔔 Atualizando configurações de notificação...');
+          this.notificationSettings = { ...this.notificationSettings, ...message.settings };
+          await this.saveNotificationSettings();
+          sendResponse({ success: true, settings: this.notificationSettings });
+          return true;
+          
+        case 'TEST_NOTIFICATION':
+          console.log('🔔 Testando notificação...');
+          await this.createNotification({
+            title: '🧪 Notificação de Teste',
+            message: 'Sistema de notificações funcionando perfeitamente!',
+            contextMessage: 'BuscaLogo'
+          });
+          sendResponse({ success: true, message: 'Notificação de teste enviada' });
+          return true;
+          
+        case 'GET_ANALYTICS_DATA':
+          console.log('📊 Obtendo dados de analytics...');
+          const analyticsData = await this.getAnalyticsData();
+          sendResponse({ success: true, data: analyticsData });
+          return true;
+          
+        case 'EXPORT_ANALYTICS_DATA':
+          console.log('📤 Exportando dados de analytics...');
+          const exportData = await this.exportAnalyticsData();
+          sendResponse({ success: true, data: exportData });
+          return true;
+          
+        case 'GET_ALL_PAGES':
+          console.log('📄 Obtendo todas as páginas...');
+          const allPages = await this.getAllPagesData();
+          sendResponse({ success: true, pages: allPages });
           return true;
           
         default:
@@ -734,6 +798,9 @@ class BuscaLogoBackground {
       
       // Atualiza estatísticas
       this.updateStats();
+      
+      // Notifica nova página capturada
+      await this.notifyNewPageCaptured(pageData);
       
       console.log('✅ Página capturada com sucesso!');
       
@@ -1625,6 +1692,9 @@ class BuscaLogoBackground {
           capturedBy: 'crawling'
         });
         
+        // Notifica progresso do crawling
+        await this.notifyCrawlingProgress(this.crawlingStats);
+        
         // Processa links do artigo para descoberta adicional
         if (articleData.links && articleData.links.length > 0) {
           console.log(`🔍 Artigo tem ${articleData.links.length} links, analisando para descoberta...`);
@@ -1868,6 +1938,495 @@ class BuscaLogoBackground {
     );
     
     return filteredWords.slice(0, 20);
+  }
+
+  /**
+   * Sistema de Notificações
+   */
+  
+  /**
+   * Carrega configurações de notificação
+   */
+  async loadNotificationSettings() {
+    try {
+      const result = await chrome.storage.local.get(['notificationSettings']);
+      if (result.notificationSettings) {
+        this.notificationSettings = { ...this.notificationSettings, ...result.notificationSettings };
+        console.log('🔔 Configurações de notificação carregadas:', this.notificationSettings);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar configurações de notificação:', error);
+    }
+  }
+  
+  /**
+   * Salva configurações de notificação
+   */
+  async saveNotificationSettings() {
+    try {
+      await chrome.storage.local.set({ notificationSettings: this.notificationSettings });
+      console.log('💾 Configurações de notificação salvas');
+    } catch (error) {
+      console.error('❌ Erro ao salvar configurações de notificação:', error);
+    }
+  }
+  
+  /**
+   * Cria notificação
+   */
+  async createNotification(options) {
+    try {
+      if (!this.notificationSettings.enabled) {
+        console.log('🔕 Notificações desabilitadas');
+        return;
+      }
+      
+      const notificationOptions = {
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        priority: 1,
+        ...options
+      };
+      
+      // Cria notificação única
+      const notificationId = `buscalogo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      await chrome.notifications.create(notificationId, notificationOptions);
+      console.log('🔔 Notificação criada:', notificationOptions.title);
+      
+      // Atualiza badge se habilitado
+      if (this.notificationSettings.showBadge) {
+        this.updateBadge();
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro ao criar notificação:', error);
+    }
+  }
+  
+  /**
+   * Notifica nova página capturada
+   */
+  async notifyNewPageCaptured(pageData) {
+    if (!this.notificationSettings.newPageCaptured) return;
+    
+    await this.createNotification({
+      title: '📄 Nova Página Capturada',
+      message: `${pageData.title || 'Página sem título'} foi adicionada ao índice`,
+      contextMessage: 'BuscaLogo'
+    });
+  }
+  
+  /**
+   * Notifica progresso do crawling
+   */
+  async notifyCrawlingProgress(stats) {
+    if (!this.notificationSettings.crawlingProgress) return;
+    
+    const { totalDiscovered, totalCaptured, totalFailed } = stats;
+    
+    if (totalCaptured > 0 && totalCaptured % 5 === 0) { // Notifica a cada 5 páginas
+      await this.createNotification({
+        title: '🕷️ Crawling em Progresso',
+        message: `${totalCaptured} páginas capturadas, ${totalDiscovered - totalCaptured} na fila`,
+        contextMessage: 'BuscaLogo'
+      });
+    }
+  }
+  
+  /**
+   * Notifica mudança de status de conexão
+   */
+  async notifyConnectionStatus(isConnected) {
+    if (!this.notificationSettings.connectionStatus) return;
+    
+    const wasConnected = this.isConnectedToServer;
+    this.isConnectedToServer = isConnected;
+    
+    // Só notifica se houve mudança real de status
+    if (wasConnected !== isConnected) {
+      if (isConnected) {
+        await this.createNotification({
+          title: '🔗 Conectado ao Servidor',
+          message: 'BuscaLogo está conectado e funcionando',
+          contextMessage: 'BuscaLogo'
+        });
+      } else {
+        await this.createNotification({
+          title: '🔌 Desconectado do Servidor',
+          message: 'Tentando reconectar automaticamente...',
+          contextMessage: 'BuscaLogo'
+        });
+      }
+    }
+  }
+  
+  /**
+   * Atualiza badge da extensão
+   */
+  async updateBadge() {
+    try {
+      if (!this.notificationSettings.showBadge) {
+        await chrome.action.setBadgeText({ text: '' });
+        return;
+      }
+      
+      // Calcula número de notificações pendentes
+      const pendingNotifications = this.notificationQueue.length;
+      
+      if (pendingNotifications > 0) {
+        const badgeText = pendingNotifications > 99 ? '99+' : pendingNotifications.toString();
+        await chrome.action.setBadgeText({ text: badgeText });
+        await chrome.action.setBadgeBackgroundColor({ color: '#FF5722' });
+      } else {
+        await chrome.action.setBadgeText({ text: '' });
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro ao atualizar badge:', error);
+    }
+  }
+  
+  /**
+   * Sistema de Analytics
+   */
+  
+  /**
+   * Obtém dados para o dashboard de analytics
+   */
+  async getAnalyticsData() {
+    try {
+      if (!this.db) return {};
+      
+      const data = {
+        totalLinks: 0,
+        totalAnalyses: 0,
+        dbSize: 0,
+        lastUpdate: Date.now(),
+        pagesPerDay: [],
+        topDomains: [],
+        qualityMetrics: {}
+      };
+      
+      // Conta links indexados
+      try {
+        const linkTransaction = this.db.transaction(['linkIndex'], 'readonly');
+        const linkStore = linkTransaction.objectStore('linkIndex');
+        const linkCount = await this.getStoreCount(linkStore);
+        data.totalLinks = linkCount;
+      } catch (error) {
+        console.warn('⚠️ Erro ao contar links:', error);
+      }
+      
+      // Conta análises de conteúdo
+      try {
+        const analysisTransaction = this.db.transaction(['contentAnalysis'], 'readonly');
+        const analysisStore = analysisTransaction.objectStore('contentAnalysis');
+        const analysisCount = await this.getStoreCount(analysisStore);
+        data.totalAnalyses = analysisCount;
+      } catch (error) {
+        console.warn('⚠️ Erro ao contar análises:', error);
+      }
+      
+      // Calcula tamanho aproximado do banco
+      data.dbSize = await this.estimateDatabaseSize();
+      
+      // Gera dados de páginas por dia (últimos 7 dias)
+      data.pagesPerDay = await this.generatePagesPerDayData();
+      
+      // Gera dados de top domínios
+      data.topDomains = await this.generateTopDomainsData();
+      
+      // Calcula métricas de qualidade
+      data.qualityMetrics = await this.calculateQualityMetrics();
+      
+      console.log('📊 Dados de analytics gerados:', data);
+      return data;
+      
+    } catch (error) {
+      console.error('❌ Erro ao gerar dados de analytics:', error);
+      return {};
+    }
+  }
+  
+  /**
+   * Exporta dados completos para download
+   */
+  async exportAnalyticsData() {
+    try {
+      if (!this.db) return {};
+      
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        version: '1.0.0',
+        stats: this.stats,
+        crawlingStats: this.crawlingStats,
+        analytics: await this.getAnalyticsData(),
+        pages: await this.getAllPagesData(),
+        links: await this.getAllLinksData(),
+        analyses: await this.getAllAnalysesData()
+      };
+      
+      console.log('📤 Dados de exportação preparados:', exportData);
+      return exportData;
+      
+    } catch (error) {
+      console.error('❌ Erro ao exportar dados:', error);
+      return {};
+    }
+  }
+  
+  /**
+   * Conta registros em uma store
+   */
+  async getStoreCount(store) {
+    return new Promise((resolve) => {
+      const request = store.count();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => resolve(0);
+    });
+  }
+  
+  /**
+   * Estima tamanho do banco de dados
+   */
+  async estimateDatabaseSize() {
+    try {
+      // Estimativa baseada no número de registros
+      let totalSize = 0;
+      
+      // Páginas capturadas (estimativa: 2KB por página)
+      totalSize += (this.stats.totalPages || 0) * 2048;
+      
+      // Links indexados (estimativa: 500B por link)
+      const linkCount = await this.getStoreCount(
+        this.db.transaction(['linkIndex'], 'readonly').objectStore('linkIndex')
+      );
+      totalSize += linkCount * 500;
+      
+      // Análises de conteúdo (estimativa: 1KB por análise)
+      const analysisCount = await this.getStoreCount(
+        this.db.transaction(['contentAnalysis'], 'readonly').objectStore('contentAnalysis')
+      );
+      totalSize += analysisCount * 1024;
+      
+      return totalSize;
+      
+    } catch (error) {
+      console.warn('⚠️ Erro ao estimar tamanho do banco:', error);
+      return 0;
+    }
+  }
+  
+  /**
+   * Gera dados de páginas por dia
+   */
+  async generatePagesPerDayData() {
+    try {
+      const pagesPerDay = [];
+      const today = new Date();
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateString = date.toDateString();
+        
+        // Conta páginas capturadas neste dia
+        let pageCount = 0;
+        try {
+          const transaction = this.db.transaction(['capturedPages'], 'readonly');
+          const store = transaction.objectStore('capturedPages');
+          const index = store.index('timestamp');
+          
+          const startOfDay = new Date(date);
+          startOfDay.setHours(0, 0, 0, 0);
+          const endOfDay = new Date(date);
+          endOfDay.setHours(23, 59, 59, 999);
+          
+          const range = IDBKeyRange.bound(startOfDay.getTime(), endOfDay.getTime());
+          const request = index.count(range);
+          
+          pageCount = await new Promise((resolve) => {
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => resolve(0);
+          });
+          
+        } catch (error) {
+          console.warn(`⚠️ Erro ao contar páginas para ${dateString}:`, error);
+        }
+        
+        pagesPerDay.push({
+          date: dateString,
+          count: pageCount
+        });
+      }
+      
+      return pagesPerDay;
+      
+    } catch (error) {
+      console.warn('⚠️ Erro ao gerar dados de páginas por dia:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Gera dados de top domínios
+   */
+  async generateTopDomainsData() {
+    try {
+      const domainCounts = new Map();
+      
+      // Conta páginas por domínio
+      const transaction = this.db.transaction(['capturedPages'], 'readonly');
+      const store = transaction.objectStore('capturedPages');
+      const request = store.getAll();
+      
+      const pages = await new Promise((resolve) => {
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => resolve([]);
+      });
+      
+      pages.forEach(page => {
+        if (page.hostname) {
+          const count = domainCounts.get(page.hostname) || 0;
+          domainCounts.set(page.hostname, count + 1);
+        }
+      });
+      
+      // Ordena por contagem e retorna top 10
+      const sortedDomains = Array.from(domainCounts.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([domain, count]) => ({ domain, count }));
+      
+      return sortedDomains;
+      
+    } catch (error) {
+      console.warn('⚠️ Erro ao gerar dados de top domínios:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Calcula métricas de qualidade
+   */
+  async calculateQualityMetrics() {
+    try {
+      const metrics = {
+        avgScore: 0,
+        highQualityPages: 0,
+        lowQualityPages: 0,
+        totalScored: 0
+      };
+      
+      // Calcula score médio baseado em relevância dos links
+      const linkTransaction = this.db.transaction(['linkIndex'], 'readonly');
+      const linkStore = linkTransaction.objectStore('linkIndex');
+      const request = linkStore.getAll();
+      
+      const links = await new Promise((resolve) => {
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => resolve([]);
+      });
+      
+      if (links.length > 0) {
+        const totalRelevance = links.reduce((sum, link) => sum + (link.relevance || 0), 0);
+        metrics.avgScore = totalRelevance / links.length;
+        metrics.totalScored = links.length;
+        
+        // Classifica páginas por qualidade
+        metrics.highQualityPages = links.filter(link => (link.relevance || 0) > 0.7).length;
+        metrics.lowQualityPages = links.filter(link => (link.relevance || 0) < 0.3).length;
+      }
+      
+      return metrics;
+      
+    } catch (error) {
+      console.warn('⚠️ Erro ao calcular métricas de qualidade:', error);
+      return {};
+    }
+  }
+  
+  /**
+   * Obtém dados de todas as páginas para exportação
+   */
+  async getAllPagesData() {
+    try {
+      const transaction = this.db.transaction(['capturedPages'], 'readonly');
+      const store = transaction.objectStore('capturedPages');
+      const request = store.getAll();
+      
+      return await new Promise((resolve) => {
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => resolve([]);
+      });
+      
+    } catch (error) {
+      console.warn('⚠️ Erro ao obter dados das páginas:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Obtém dados de todos os links para exportação
+   */
+  async getAllLinksData() {
+    try {
+      const transaction = this.db.transaction(['linkIndex'], 'readonly');
+      const store = transaction.objectStore('linkIndex');
+      const request = store.getAll();
+      
+      return await new Promise((resolve) => {
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => resolve([]);
+      });
+      
+    } catch (error) {
+      console.warn('⚠️ Erro ao obter dados dos links:', error);
+      return [];
+    }
+  }
+  
+  /**
+   * Obtém dados de todas as análises para exportação
+   */
+  async getAllAnalysesData() {
+    try {
+      const transaction = this.db.transaction(['contentAnalysis'], 'readonly');
+      const store = transaction.objectStore('contentAnalysis');
+      const request = store.getAll();
+      
+      return await new Promise((resolve) => {
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => resolve([]);
+      });
+      
+    } catch (error) {
+      console.warn('⚠️ Erro ao obter dados das análises:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Limpa notificações antigas
+   */
+  async clearOldNotifications() {
+    try {
+      const notifications = await chrome.notifications.getAll();
+      
+      for (const [id, notification] of Object.entries(notifications)) {
+        if (id.startsWith('buscalogo_')) {
+          // Remove notificações com mais de 1 hora
+          const notificationTime = parseInt(id.split('_')[1]);
+          if (Date.now() - notificationTime > 3600000) {
+            await chrome.notifications.clear(id);
+          }
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro ao limpar notificações antigas:', error);
+    }
   }
 
   /**

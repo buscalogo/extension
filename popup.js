@@ -36,6 +36,9 @@ class BuscaLogoPopup {
       // Carrega histórico
       await this.loadHistory();
       
+      // Carrega configurações de notificação
+      await this.loadNotificationSettings();
+      
       console.log('✅ Popup BuscaLogo inicializado');
       
     } catch (error) {
@@ -71,6 +74,17 @@ class BuscaLogoPopup {
       refreshStats: document.getElementById('refreshStats'),
       clearData: document.getElementById('clearData'),
       testSearch: document.getElementById('testSearch'), // Adicionado botão de teste de busca
+      openSearch: document.getElementById('openSearch'), // Botão da busca avançada
+      openDashboard: document.getElementById('openDashboard'), // Botão do dashboard
+      
+      // Notification Settings
+      notificationsEnabled: document.getElementById('notificationsEnabled'),
+      newPageNotifications: document.getElementById('newPageNotifications'),
+      crawlingNotifications: document.getElementById('crawlingNotifications'),
+      connectionNotifications: document.getElementById('connectionNotifications'),
+      showBadge: document.getElementById('showBadge'),
+      testNotification: document.getElementById('testNotification'),
+      saveNotificationSettings: document.getElementById('saveNotificationSettings'),
       
       // History
       historyCount: document.getElementById('historyCount'),
@@ -87,6 +101,12 @@ class BuscaLogoPopup {
     this.elements.refreshStats.addEventListener('click', () => { this.loadStatus(); this.loadHistory(); });
     this.elements.testSearch.addEventListener('click', () => this.testSearch());
     this.elements.clearData.addEventListener('click', () => this.clearData());
+    this.elements.openSearch.addEventListener('click', () => this.openSearch());
+    this.elements.openDashboard.addEventListener('click', () => this.openDashboard());
+    
+    // Notification settings event listeners
+    this.elements.testNotification.addEventListener('click', () => this.testNotification());
+    this.elements.saveNotificationSettings.addEventListener('click', () => this.saveNotificationSettings());
   }
   
   /**
@@ -489,6 +509,127 @@ class BuscaLogoPopup {
     } finally {
       this.setLoading(false);
       this.elements.testSearch.textContent = 'Testar Busca';
+    }
+  }
+  
+  /**
+   * Carrega configurações de notificação
+   */
+  async loadNotificationSettings() {
+    try {
+      const response = await this.sendMessage('GET_NOTIFICATION_SETTINGS');
+      
+      if (response.success) {
+        const settings = response.settings;
+        
+        // Atualiza checkboxes
+        this.elements.notificationsEnabled.checked = settings.enabled;
+        this.elements.newPageNotifications.checked = settings.newPageCaptured;
+        this.elements.crawlingNotifications.checked = settings.crawlingProgress;
+        this.elements.connectionNotifications.checked = settings.connectionStatus;
+        this.elements.showBadge.checked = settings.showBadge;
+        
+        console.log('🔔 Configurações de notificação carregadas:', settings);
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro ao carregar configurações de notificação:', error);
+    }
+  }
+  
+  /**
+   * Salva configurações de notificação
+   */
+  async saveNotificationSettings() {
+    try {
+      this.setLoading(true);
+      this.elements.saveNotificationSettings.textContent = '💾 Salvando...';
+      
+      const settings = {
+        enabled: this.elements.notificationsEnabled.checked,
+        newPageCaptured: this.elements.newPageNotifications.checked,
+        crawlingProgress: this.elements.crawlingNotifications.checked,
+        connectionStatus: this.elements.connectionNotifications.checked,
+        showBadge: this.elements.showBadge.checked
+      };
+      
+      const response = await this.sendMessage('UPDATE_NOTIFICATION_SETTINGS', { settings });
+      
+      if (response.success) {
+        console.log('✅ Configurações de notificação salvas:', settings);
+        this.showMessage('Configurações salvas com sucesso!', 'success');
+      } else {
+        throw new Error(response.error || 'Erro ao salvar configurações');
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro ao salvar configurações de notificação:', error);
+      this.showMessage('Erro ao salvar configurações: ' + error.message, 'error');
+    } finally {
+      this.setLoading(false);
+      this.elements.saveNotificationSettings.textContent = '💾 Salvar';
+    }
+  }
+  
+  /**
+   * Testa notificação
+   */
+  async testNotification() {
+    try {
+      this.setLoading(true);
+      this.elements.testNotification.textContent = '🧪 Testando...';
+      
+      const response = await this.sendMessage('TEST_NOTIFICATION');
+      
+      if (response.success) {
+        console.log('✅ Teste de notificação bem-sucedido');
+        this.showMessage('Notificação de teste enviada!', 'success');
+      } else {
+        throw new Error(response.error || 'Erro no teste de notificação');
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro no teste de notificação:', error);
+      this.showMessage('Erro no teste: ' + error.message, 'error');
+    } finally {
+      this.setLoading(false);
+      this.elements.testNotification.textContent = '🧪 Testar';
+    }
+  }
+  
+  /**
+   * Abre a interface de busca avançada
+   */
+  openSearch() {
+    try {
+      // Abre a interface de busca em uma nova aba
+      chrome.tabs.create({
+        url: chrome.runtime.getURL('search-interface.html')
+      });
+      
+      console.log('🔍 Interface de busca aberta em nova aba');
+      
+    } catch (error) {
+      console.error('❌ Erro ao abrir interface de busca:', error);
+      this.showMessage('Erro ao abrir interface de busca: ' + error.message, 'error');
+    }
+  }
+  
+  /**
+   * Abre o dashboard de analytics
+   */
+  openDashboard() {
+    try {
+      // Abre o dashboard em uma nova aba
+      chrome.tabs.create({
+        url: chrome.runtime.getURL('analytics-dashboard.html')
+      });
+      
+      console.log('📊 Dashboard aberto em nova aba');
+      
+    } catch (error) {
+      console.error('❌ Erro ao abrir dashboard:', error);
+      this.showMessage('Erro ao abrir dashboard: ' + error.message, 'error');
     }
   }
 }
