@@ -2,22 +2,15 @@
   "manifest_version": 3,
   "name": "BuscaLogo - Buscador Colaborativo P2P",
   "version": "1.0.0",
-  "description": "Extensão que coleta dados das páginas visitadas e permite busca colaborativa via P2P",
+  "description": "Sistema de busca colaborativo que permite capturar, indexar e buscar páginas web de forma descentralizada usando tecnologia P2P.",
   
   "permissions": [
     "storage",
+    "tabs",
     "activeTab",
     "scripting",
     "notifications",
-    "bookmarks",
-    "tabs"
-  ],
-  
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*",
-    "ws://localhost:3001/*",
-    "wss://localhost:3001/*"
+    "bookmarks"
   ],
   
   "background": {
@@ -28,13 +21,14 @@
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"],
+      "css": ["floating-capture.css"],
       "run_at": "document_end"
     }
   ],
   
   "action": {
     "default_popup": "popup.html",
-    "default_title": "BuscaLogo",
+    "default_title": "BuscaLogo - Buscador Colaborativo",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -52,12 +46,17 @@
   
   "web_accessible_resources": [
     {
-      "resources": ["storage.indexeddb.js", "storage.pglite.js", "signaling.js", "webrtc.js", "floating-capture.css", "floating-capture.js", "floating-capture-inline.js", "test-floating.html"],
+      "resources": [
+        "search-interface.html",
+        "analytics-dashboard.html",
+        "floating-capture.js",
+        "floating-capture-inline.js"
+      ],
       "matches": ["<all_urls>"]
     }
   ],
   
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 }

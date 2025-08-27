@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuscaLogo - Dashboard Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      width: 800px;
+      min-height: 600px;
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .metric-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+    
+    .metric-number {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .metric-label {
+      font-size: 14px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .chart-container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+    
+    .chart-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .chart-canvas {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .btn-primary {
+      background: #4CAF50;
+      border-color: #4CAF50;
+    }
+    
+    .btn-primary:hover {
+      background: #45a049;
+    }
+    
+    .btn-secondary {
+      background: #2196F3;
+      border-color: #2196F3;
+    }
+    
+    .btn-secondary:hover {
+      background: #1976D2;
+    }
+    
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    
+    .error-message {
+      background: rgba(244, 67, 54, 0.2);
+      border: 1px solid rgba(244, 67, 54, 0.5);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .success-message {
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .stats-table {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+    
+    .stats-table h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stats-row:last-child {
+      border-bottom: none;
+    }
+    
+    .stats-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .stats-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .refresh-indicator {
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">📊 Dashboard Analytics</div>
+    <div class="subtitle">Estatísticas em tempo real da extensão BuscaLogo</div>
+  </div>
+  
+  <!-- Controles -->
+  <div class="controls">
+    <button class="btn btn-primary" id="refreshData">🔄 Atualizar Dados</button>
+    <button class="btn btn-secondary" id="exportData">📤 Exportar Dados</button>
+    <button class="btn" id="openPopup">📱 Abrir Popup</button>
+  </div>
+  
+  <!-- Métricas Principais -->
+  <div class="dashboard-grid">
+    <div class="metric-card">
+      <div class="metric-number" id="totalPages">-</div>
+      <div class="metric-label">Total de Páginas</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-number" id="pagesToday">-</div>
+      <div class="metric-label">Páginas Hoje</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-number" id="uniqueHosts">-</div>
+      <div class="metric-label">Hosts Únicos</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-number" id="avgQuality">-</div>
+      <div class="metric-label">Qualidade Média</div>
+    </div>
+  </div>
+  
+  <!-- Gráfico de Páginas por Dia -->
+  <div class="chart-container">
+    <div class="chart-title">📈 Páginas Capturadas por Dia (Últimos 7 dias)</div>
+    <div class="chart-canvas">
+      <canvas id="pagesChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+  
+  <!-- Gráfico de Domínios -->
+  <div class="chart-container">
+    <div class="chart-title">🌐 Top 10 Domínios Mais Visitados</div>
+    <div class="chart-canvas">
+      <canvas id="domainsChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+  
+  <!-- Estatísticas Detalhadas -->
+  <div class="stats-table">
+    <h3>📊 Estatísticas Detalhadas</h3>
+    <div class="stats-row">
+      <span class="stats-label">Total de Links Indexados:</span>
+      <span class="stats-value" id="totalLinks">-</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">Análises de Conteúdo:</span>
+      <span class="stats-value" id="totalAnalyses">-</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">Tamanho do Banco:</span>
+      <span class="stats-value" id="dbSize">-</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">Última Atualização:</span>
+      <span class="stats-value" id="lastUpdate">-</span>
+    </div>
+  </div>
+  
+  <!-- Estatísticas de Crawling -->
+  <div class="stats-table">
+    <h3>🕷️ Estatísticas de Crawling</h3>
+    <div class="stats-row">
+      <span class="stats-label">Total Descoberto:</span>
+      <span class="stats-value" id="totalDiscovered">-</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">Total Capturado:</span>
+      <span class="stats-value" id="totalCaptured">-</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">Total Falharam:</span>
+      <span class="stats-value" id="totalFailed">-</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">Status do Crawling:</span>
+      <span class="stats-value" id="crawlingStatus">-</span>
+    </div>
+    <div class="stats-row">
+      <span class="stats-label">Tamanho da Fila:</span>
+      <span class="stats-value" id="queueSize">-</span>
+    </div>
+  </div>
+  
+  <!-- Indicador de Atualização -->
+  <div class="refresh-indicator" id="refreshIndicator">
+    Última atualização: Nunca
+  </div>
+  
+  <script src="analytics-dashboard.js"></script>
+</body>
+</html>

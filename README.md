@@ -39,6 +39,19 @@ The BuscaLogo Chrome Extension is a powerful tool that automatically captures, a
 - **Badge Updates**: Visual indicators on extension icon
 - **System Integration**: Native Chrome notifications
 
+### **⭐ Favorites Import**
+- **Chrome Bookmarks**: Import existing browser bookmarks
+- **Smart Processing**: Extract search terms from bookmark titles
+- **Duplicate Prevention**: Avoid importing already captured pages
+- **Batch Import**: Process all bookmarks efficiently
+
+### **🎯 Smart Capture Notifications**
+- **Visual Notifications**: Elegant notifications for uncaptured pages
+- **Auto-Detection**: Automatically identifies pages not in the system
+- **One-Click Capture**: Quick capture with visual feedback
+- **Status Awareness**: Shows if page is already captured
+- **Integrated System**: Works directly in content script for reliability
+
 ### **🔄 P2P Collaboration**
 - **Distributed Search**: Share and discover content with other users
 - **Real-time Sync**: Live updates across connected peers
@@ -58,6 +71,7 @@ The BuscaLogo Chrome Extension is a powerful tool that automatically captures, a
 ### **Prerequisites**
 - Chrome/Chromium browser (version 88+)
 - Developer mode enabled
+- Bookmarks permission (for favorites import feature)
 
 ### **Installation Steps**
 
@@ -73,7 +87,7 @@ The BuscaLogo Chrome Extension is a powerful tool that automatically captures, a
 
 3. **Configure Permissions**
    - The extension will request necessary permissions
-   - Grant access to storage, active tabs, and notifications
+   - Grant access to storage, active tabs, notifications, and bookmarks
    - Review and accept the permission requests
 
 4. **Verify Installation**

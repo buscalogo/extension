@@ -1,0 +1,137 @@
+/* Botão Flutuante de Captura - BuscaLogo */
+.buscalogo-floating-capture {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 999999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+}
+
+.buscalogo-floating-capture.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(100px);
+}
+
+.buscalogo-floating-capture.auto-hide {
+  animation: buscalogo-fade-out 5s forwards;
+}
+
+@keyframes buscalogo-fade-out {
+  0%, 80% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(100px); }
+}
+
+.buscalogo-capture-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.buscalogo-capture-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.buscalogo-capture-button:active {
+  transform: translateY(0);
+}
+
+.buscalogo-capture-button.capturing {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  pointer-events: none;
+}
+
+.buscalogo-capture-button.already-captured {
+  background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%);
+  pointer-events: none;
+}
+
+.buscalogo-capture-icon {
+  font-size: 16px;
+}
+
+.buscalogo-capture-text {
+  white-space: nowrap;
+}
+
+.buscalogo-capture-tooltip {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.buscalogo-capture-button:hover .buscalogo-capture-tooltip {
+  opacity: 1;
+}
+
+.buscalogo-capture-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 20px;
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .buscalogo-floating-capture {
+    top: 10px;
+    right: 10px;
+  }
+  
+  .buscalogo-capture-button {
+    padding: 10px 16px;
+    font-size: 12px;
+    min-width: 120px;
+  }
+  
+  .buscalogo-capture-text {
+    display: none;
+  }
+  
+  .buscalogo-capture-button {
+    min-width: auto;
+    padding: 12px;
+  }
+}
+
+/* Animações de entrada */
+.buscalogo-floating-capture.entering {
+  animation: buscalogo-slide-in 0.5s ease-out;
+}
+
+@keyframes buscalogo-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

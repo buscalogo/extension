@@ -91,7 +91,6 @@ class BuscaLogoPopup {
       connectionNotifications: document.getElementById('connectionNotifications'),
       showBadge: document.getElementById('showBadge'),
       showAlreadyCaptured: document.getElementById('showAlreadyCaptured'),
-      showNotCaptured: document.getElementById('showNotCaptured'),
       testNotification: document.getElementById('testNotification'),
       saveNotificationSettings: document.getElementById('saveNotificationSettings'),
       
@@ -592,7 +591,6 @@ class BuscaLogoPopup {
         this.elements.connectionNotifications.checked = settings.connectionStatus;
         this.elements.showBadge.checked = settings.showBadge;
         this.elements.showAlreadyCaptured.checked = settings.showAlreadyCaptured;
-        this.elements.showNotCaptured.checked = settings.showNotCaptured;
         
         console.log('🔔 Configurações de notificação carregadas');
       }
@@ -618,8 +616,7 @@ class BuscaLogoPopup {
         crawlingProgress: this.elements.crawlingNotifications.checked,
         connectionStatus: this.elements.connectionNotifications.checked,
         showBadge: this.elements.showBadge.checked,
-        showAlreadyCaptured: this.elements.showAlreadyCaptured.checked,
-        showNotCaptured: this.elements.showNotCaptured.checked
+        showAlreadyCaptured: this.elements.showAlreadyCaptured.checked
       };
       
       const response = await this.sendMessage('UPDATE_NOTIFICATION_SETTINGS', { settings });

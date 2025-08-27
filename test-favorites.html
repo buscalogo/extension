@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste de Favoritos - BuscaLogo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+    }
+    
+    .test-section h2 {
+      color: #555;
+      margin-top: 0;
+    }
+    
+    .btn {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .btn:hover {
+      background: #1976D2;
+    }
+    
+    .btn-success {
+      background: #4CAF50;
+    }
+    
+    .btn-success:hover {
+      background: #45a049;
+    }
+    
+    .btn-warning {
+      background: #FF9800;
+    }
+    
+    .btn-warning:hover {
+      background: #F57C00;
+    }
+    
+    .result {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .result.success {
+      background: #e8f5e8;
+      border: 1px solid #4CAF50;
+      color: #2e7d32;
+    }
+    
+    .result.error {
+      background: #ffebee;
+      border: 1px solid #f44336;
+      color: #c62828;
+    }
+    
+    .result.info {
+      background: #e3f2fd;
+      border: 1px solid #2196F3;
+      color: #1565c0;
+    }
+    
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    
+    .status.connected {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .status.disconnected {
+      background: #f44336;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Teste de Funcionalidades - BuscaLogo</h1>
+    
+    <div class="test-section">
+      <h2>📊 Status da Extensão</h2>
+      <button class="btn" onclick="checkExtensionStatus()">Verificar Status</button>
+      <span id="extensionStatus" class="status disconnected">Desconectado</span>
+      
+      <div id="statusResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>⭐ Funcionalidades de Favoritos</h2>
+      <button class="btn" onclick="getFavoritesCount()">Contar Favoritos</button>
+      <button class="btn btn-success" onclick="importFavorites()">Importar Favoritos</button>
+      <button class="btn btn-warning" onclick="testFavoritesAPI()">Testar API</button>
+      
+      <div id="favoritesResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>🔍 Teste de Busca</h2>
+      <button class="btn" onclick="testSearch()">Testar Busca Local</button>
+      
+      <div id="searchResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>📈 Estatísticas</h2>
+      <button class="btn" onclick="getStats()">Obter Estatísticas</button>
+      
+      <div id="statsResult" class="result" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Verifica se a extensão está disponível
+    function checkExtensionAvailable() {
+      return typeof chrome !== 'undefined' && 
+             chrome.runtime && 
+             chrome.runtime.sendMessage;
+    }
+    
+    // Atualiza status da extensão
+    function updateExtensionStatus(connected) {
+      const statusElement = document.getElementById('extensionStatus');
+      if (connected) {
+        statusElement.textContent = 'Conectado';
+        statusElement.className = 'status connected';
+      } else {
+        statusElement.textContent = 'Desconectado';
+        statusElement.className = 'status disconnected';
+      }
+    }
+    
+    // Envia mensagem para a extensão
+    async function sendMessage(type, data = {}) {
+      if (!checkExtensionAvailable()) {
+        throw new Error('Extensão não disponível');
+      }
+      
+      return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({ type, data }, (response) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve(response);
+          }
+        });
+      });
+    }
+    
+    // Verifica status da extensão
+    async function checkExtensionStatus() {
+      try {
+        const result = document.getElementById('statusResult');
+        result.style.display = 'block';
+        result.className = 'result info';
+        result.textContent = 'Verificando status...';
+        
+        const response = await sendMessage('GET_STATUS');
+        
+        if (response.success) {
+          result.className = 'result success';
+          result.textContent = JSON.stringify(response.status, null, 2);
+          updateExtensionStatus(true);
+        } else {
+          throw new Error(response.error || 'Erro desconhecido');
+        }
+        
+      } catch (error) {
+        const result = document.getElementById('statusResult');
+        result.style.display = 'block';
+        result.className = 'result error';
+        result.textContent = 'Erro: ' + error.message;
+        updateExtensionStatus(false);
+      }
+    }
+    
+    // Obtém contagem de favoritos
+    async function getFavoritesCount() {
+      try {
+        const result = document.getElementById('favoritesResult');
+        result.style.display = 'block';
+        result.className = 'result info';
+        result.textContent = 'Contando favoritos...';
+        
+        const response = await sendMessage('GET_FAVORITES_COUNT');
+        
+        if (response.success) {
+          result.className = 'result success';
+          result.textContent = `Total de favoritos encontrados: ${response.count}`;
+        } else {
+          throw new Error(response.error || 'Erro desconhecido');
+        }
+        
+      } catch (error) {
+        const result = document.getElementById('favoritesResult');
+        result.style.display = 'block';
+        result.className = 'result error';
+        result.textContent = 'Erro: ' + error.message;
+      }
+    }
+    
+    // Importa favoritos
+    async function importFavorites() {
+      try {
+        const result = document.getElementById('favoritesResult');
+        result.style.display = 'block';
+        result.className = 'result info';
+        result.textContent = 'Importando favoritos...';
+        
+        const response = await sendMessage('IMPORT_FAVORITES');
+        
+        if (response.success) {
+          const { imported, total, errors } = response.result;
+          result.className = 'result success';
+          result.textContent = `Importação concluída!\n\n` +
+                             `✅ ${imported} de ${total} favoritos importados com sucesso\n` +
+                             `❌ ${errors} erros durante a importação`;
+        } else {
+          throw new Error(response.error || 'Erro desconhecido');
+        }
+        
+      } catch (error) {
+        const result = document.getElementById('favoritesResult');
+        result.style.display = 'block';
+        result.className = 'result error';
+        result.textContent = 'Erro: ' + error.message;
+      }
+    }
+    
+    // Testa API de favoritos
+    async function testFavoritesAPI() {
+      try {
+        const result = document.getElementById('favoritesResult');
+        result.style.display = 'block';
+        result.className = 'result info';
+        result.textContent = 'Testando API de favoritos...';
+        
+        // Testa se a API está disponível
+        if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+          const bookmarks = await chrome.bookmarks.getTree();
+          let count = 0;
+          
+          const countBookmarks = (nodes) => {
+            for (const node of nodes) {
+              if (node.url) count++;
+              if (node.children) countBookmarks(node.children);
+            }
+          };
+          
+          countBookmarks(bookmarks);
+          
+          result.className = 'result success';
+          result.textContent = `API de favoritos funcionando!\n\n` +
+                             `Total de favoritos: ${count}\n` +
+                             `Estrutura: ${JSON.stringify(bookmarks.slice(0, 2), null, 2)}`;
+        } else {
+          throw new Error('API de favoritos não disponível');
+        }
+        
+      } catch (error) {
+        const result = document.getElementById('favoritesResult');
+        result.style.display = 'block';
+        result.className = 'result error';
+        result.textContent = 'Erro: ' + error.message;
+      }
+    }
+    
+    // Testa busca local
+    async function testSearch() {
+      try {
+        const result = document.getElementById('searchResult');
+        result.style.display = 'block';
+        result.className = 'result info';
+        result.textContent = 'Testando busca local...';
+        
+        const response = await sendMessage('SEARCH_REQUEST', { query: 'teste' });
+        
+        if (response.success) {
+          result.className = 'result success';
+          result.textContent = `Busca testada com sucesso!\n\n` +
+                             `Resultados: ${JSON.stringify(response.results, null, 2)}`;
+        } else {
+          throw new Error(response.error || 'Erro desconhecido');
+        }
+        
+      } catch (error) {
+        const result = document.getElementById('searchResult');
+        result.style.display = 'block';
+        result.className = 'result error';
+        result.textContent = 'Erro: ' + error.message;
+      }
+    }
+    
+    // Obtém estatísticas
+    async function getStats() {
+      try {
+        const result = document.getElementById('statsResult');
+        result.style.display = 'block';
+        result.className = 'result info';
+        result.textContent = 'Obtendo estatísticas...';
+        
+        const response = await sendMessage('GET_STATS');
+        
+        if (response.success) {
+          result.className = 'result success';
+          result.textContent = `Estatísticas obtidas:\n\n` +
+                             `${JSON.stringify(response.stats, null, 2)}`;
+        } else {
+          throw new Error(response.error || 'Erro desconhecido');
+        }
+        
+      } catch (error) {
+        const result = document.getElementById('statsResult');
+        result.style.display = 'block';
+        result.className = 'result error';
+        result.textContent = 'Erro: ' + error.message;
+      }
+    }
+    
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🧪 Página de teste carregada');
+      
+      // Verifica se a extensão está disponível
+      if (checkExtensionAvailable()) {
+        console.log('✅ Extensão disponível');
+        checkExtensionStatus();
+      } else {
+        console.log('❌ Extensão não disponível');
+        updateExtensionStatus(false);
+      }
+    });
+  </script>
+</body>
+</html>

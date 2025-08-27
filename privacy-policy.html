@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidade - BuscaLogo Extension</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #7f8c8d;
+        }
+        .header-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .highlight {
+            background: #e8f6ff;
+            padding: 10px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+        }
+        .permission-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .permission-title {
+            font-weight: bold;
+            color: #495057;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        .contact-info {
+            background: #d1ecf1;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .security-note {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔒 Política de Privacidade - BuscaLogo Extension</h1>
+    
+    <div class="header-info">
+        <strong>Última atualização:</strong> 22 de Agosto de 2024<br>
+        <strong>Versão:</strong> 1.0.0<br>
+        <strong>Extensão:</strong> BuscaLogo - Buscador Colaborativo P2P
+    </div>
+
+    <div class="section">
+        <h2>1. Introdução</h2>
+        <p>Esta Política de Privacidade descreve como a extensão BuscaLogo ("nós", "nossa" ou "extensão") coleta, usa e protege suas informações quando você usa nossa extensão do navegador.</p>
+    </div>
+
+    <div class="section">
+        <h2>2. Informações que Coletamos</h2>
+        
+        <h3>2.1 Dados de Páginas Web</h3>
+        <ul>
+            <li><strong>Metadados públicos:</strong> título, descrição, headings, links</li>
+            <li><strong>URL das páginas:</strong> endereços das páginas que você escolhe capturar</li>
+            <li><strong>Conteúdo textual:</strong> texto visível das páginas para indexação</li>
+        </ul>
+
+        <h3>2.2 Dados de Uso</h3>
+        <ul>
+            <li><strong>Histórico de capturas:</strong> páginas que você indexou</li>
+            <li><strong>Configurações:</strong> suas preferências de notificação e interface</li>
+            <li><strong>Favoritos:</strong> URLs importados dos seus favoritos do navegador (se autorizado)</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>3. Como Usamos suas Informações</h2>
+        
+        <div class="highlight">
+            <strong>Propósito Principal:</strong> Criar índice local de páginas web para busca pessoal e facilitar busca e organização de conteúdo web através de sistema colaborativo P2P.
+        </div>
+
+        <h3>3.1 Funcionalidades</h3>
+        <ul>
+            <li><strong>Indexação local:</strong> organizar suas páginas capturadas</li>
+            <li><strong>Busca eficiente:</strong> encontrar conteúdo rapidamente</li>
+            <li><strong>Compartilhamento P2P:</strong> participar da rede colaborativa (opcional)</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>4. Armazenamento de Dados</h2>
+        
+        <div class="highlight">
+            <strong>Importante:</strong> Todos os dados ficam armazenados localmente em seu dispositivo usando IndexedDB. Não armazenamos dados em servidores externos.
+        </div>
+
+        <h3>4.1 Controle do Usuário</h3>
+        <ul>
+            <li><strong>Você controla:</strong> quais páginas capturar</li>
+            <li><strong>Limpeza fácil:</strong> pode deletar todos os dados a qualquer momento</li>
+            <li><strong>Exportação:</strong> pode exportar seus dados quando quiser</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>5. Permissões e Justificativas</h2>
+        
+        <div class="security-note">
+            <strong>🔒 Segurança Aprimorada:</strong> Nossa extensão usa apenas a permissão <code>activeTab</code>, que é considerada a mais segura pelo Google Chrome. Isso significa que a extensão só acessa páginas quando você explicitamente solicita a captura.
+        </div>
+        
+        <div class="permission-box">
+            <div class="permission-title">activeTab</div>
+            <strong>Por que precisamos:</strong> Para capturar dados da página ativa de forma segura<br>
+            <strong>Como usamos:</strong> Extrair metadados apenas quando você clica em "capturar"<br>
+            <strong>Segurança:</strong> Acesso limitado à aba ativa, apenas quando solicitado
+        </div>
+
+        <div class="permission-box">
+            <div class="permission-title">bookmarks</div>
+            <strong>Por que precisamos:</strong> Para importar seus favoritos existentes<br>
+            <strong>Como usamos:</strong> Ler URLs e títulos dos favoritos (somente leitura)<br>
+            <strong>Limitação:</strong> Não modificamos ou deletamos favoritos
+        </div>
+
+        <div class="permission-box">
+            <div class="permission-title">storage</div>
+            <strong>Por que precisamos:</strong> Para salvar dados localmente<br>
+            <strong>Como usamos:</strong> Armazenar páginas indexadas e configurações<br>
+            <strong>Limitação:</strong> Apenas armazenamento local, não na nuvem
+        </div>
+
+        <div class="permission-box">
+            <div class="permission-title">notifications</div>
+            <strong>Por que precisamos:</strong> Para informar sobre capturas e status<br>
+            <strong>Como usamos:</strong> Mostrar quando página foi capturada com sucesso<br>
+            <strong>Limitação:</strong> Apenas notificações informativas
+        </div>
+
+        <div class="permission-box">
+            <div class="permission-title">scripting</div>
+            <strong>Por que precisamos:</strong> Para executar coleta de dados na aba ativa<br>
+            <strong>Como usamos:</strong> Injetar script de captura quando solicitado<br>
+            <strong>Segurança:</strong> Limitado à aba ativa através de activeTab
+        </div>
+
+        <div class="permission-box">
+            <div class="permission-title">tabs</div>
+            <strong>Por que precisamos:</strong> Para identificar aba ativa e abrir busca<br>
+            <strong>Como usamos:</strong> Detectar URL atual e abrir interface em nova aba<br>
+            <strong>Limitação:</strong> Apenas informações básicas da aba
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>6. Segurança</h2>
+        
+        <h3>6.1 Proteção de Dados</h3>
+        <ul>
+            <li><strong>Armazenamento seguro:</strong> usamos APIs seguras do navegador</li>
+            <li><strong>Sem transmissão:</strong> dados ficam em seu dispositivo</li>
+            <li><strong>Criptografia P2P:</strong> comunicação P2P é criptografada</li>
+            <li><strong>activeTab:</strong> acesso às páginas apenas quando solicitado</li>
+        </ul>
+
+        <h3>6.2 Acesso</h3>
+        <ul>
+            <li><strong>Apenas você:</strong> só você tem acesso aos seus dados</li>
+            <li><strong>Sem backdoors:</strong> não temos acesso remoto aos seus dados</li>
+            <li><strong>Código transparente:</strong> funcionalidades são transparentes</li>
+            <li><strong>Sem host permissions:</strong> não acessamos sites sem sua permissão</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>7. Seus Direitos</h2>
+        
+        <h3>7.1 Controle de Dados</h3>
+        <ul>
+            <li><strong>Acessar:</strong> visualizar todos os dados coletados</li>
+            <li><strong>Modificar:</strong> alterar ou corrigir informações</li>
+            <li><strong>Deletar:</strong> remover todos os dados a qualquer momento</li>
+            <li><strong>Exportar:</strong> baixar seus dados em formato legível</li>
+        </ul>
+
+        <h3>7.2 Configurações</h3>
+        <ul>
+            <li><strong>Notificações:</strong> ativar/desativar notificações</li>
+            <li><strong>P2P:</strong> participar ou não da rede colaborativa</li>
+            <li><strong>Captura:</strong> controlar quais páginas indexar</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>8. Código Remoto</h2>
+        
+        <div class="highlight">
+            <strong>Importante:</strong> A extensão NÃO usa código remoto. Todo o código JavaScript está incluído no pacote da extensão. A conectividade P2P é apenas para troca de dados de busca entre usuários, não para execução de código remoto.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>9. Conformidade Legal</h2>
+        
+        <ul>
+            <li><strong>LGPD (Brasil):</strong> Esta extensão está em conformidade com a Lei Geral de Proteção de Dados do Brasil</li>
+            <li><strong>GDPR (Europa):</strong> Respeitamos os direitos dos usuários europeus conforme GDPR</li>
+            <li><strong>CCPA (Califórnia):</strong> Cumprimos os requisitos de privacidade da Califórnia</li>
+        </ul>
+    </div>
+
+    <div class="contact-info">
+        <h2>📞 Contato</h2>
+        <p><strong>Para questões sobre privacidade:</strong></p>
+        <p>Email: <a href="mailto:[SEU_EMAIL]">[SEU_EMAIL]</a></p>
+        <p>Suporte: Disponível através da página da extensão</p>
+    </div>
+
+    <div class="section">
+        <p><strong>Importante:</strong> Esta política de privacidade se aplica apenas à extensão BuscaLogo. Não nos responsabilizamos pelas políticas de privacidade de sites que você visita ou serviços de terceiros.</p>
+        
+        <p><strong>Aceite:</strong> Ao usar a extensão BuscaLogo, você concorda com esta política de privacidade.</p>
+    </div>
+</body>
+</html>

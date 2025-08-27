@@ -44,8 +44,7 @@ class BuscaLogoBackground {
       crawlingProgress: true,
       connectionStatus: true,
       showBadge: true,
-      showAlreadyCaptured: true,  // Nova opção para mostrar aviso de página já capturada
-      showNotCaptured: true       // Nova opção para mostrar aviso de página não capturada
+      showAlreadyCaptured: true  // Nova opção para mostrar aviso de página já capturada
     };
     this.notificationQueue = [];
     this.badgeCount = 0;
@@ -541,8 +540,7 @@ class BuscaLogoBackground {
             const response = { 
               success: true, 
               isCaptured,
-              showAlreadyCaptured: this.notificationSettings.showAlreadyCaptured,
-              showNotCaptured: this.notificationSettings.showNotCaptured
+              showAlreadyCaptured: this.notificationSettings.showAlreadyCaptured
             };
             console.log('🔍 BuscaLogo: Enviando resposta:', response);
             sendResponse(response);

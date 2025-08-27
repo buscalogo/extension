@@ -588,14 +588,8 @@
                   console.log('🎯 BuscaLogo: Configuração desabilita notificação de já capturada - não mostrando nada');
                 }
               } else if (response.isCaptured === false) {
-                console.log('🎯 BuscaLogo: Página não capturada, verificando configuração...');
-                // Verifica se deve mostrar notificação de página não capturada
-                if (response.showNotCaptured === true) {
-                  console.log('🎯 BuscaLogo: Configuração permite mostrar notificação de não capturada');
-                  this.showCaptureNotification();
-                } else {
-                  console.log('🎯 BuscaLogo: Configuração desabilita notificação de não capturada - não mostrando nada');
-                }
+                console.log('🎯 BuscaLogo: Página não capturada, mostrando notificação de captura...');
+                this.showCaptureNotification();
               } else {
                 console.log('🎯 BuscaLogo: Resposta ambígua, response.isCaptured =', response.isCaptured);
                 console.log('🎯 BuscaLogo: Mostrando notificação por padrão...');
