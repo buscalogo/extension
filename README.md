@@ -311,7 +311,7 @@ This extension is available in multiple languages:
 - **Issues**: [GitHub Issues](https://github.com/yourusername/buscalogo/issues)
 - **Documentation**: [Wiki](https://github.com/yourusername/buscalogo/wiki)
 - **Email**: support@buscalogo.com
-- **Community**: [Discord](https://discord.gg/AJjDJUc8bn)
+- **Community**: [Discord](https://discord.gg/AJjDJUc8bn) | [Telegram](https://t.me/buscalogo)
 
 ---
 

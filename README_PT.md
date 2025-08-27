@@ -297,7 +297,7 @@ Esta extensão está disponível em múltiplos idiomas:
 - **Problemas**: [GitHub Issues](https://github.com/yourusername/buscalogo/issues)
 - **Documentação**: [Wiki](https://github.com/yourusername/buscalogo/wiki)
 - **Email**: support@buscalogo.com
-- **Comunidade**: [Discord](https://discord.gg/AJjDJUc8bn)
+- **Comunidade**: [Discord](https://discord.gg/AJjDJUc8bn) | [Telegram](https://t.me/buscalogo)
 
 ---
 
