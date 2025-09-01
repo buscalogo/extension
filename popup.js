@@ -46,6 +46,9 @@ class BuscaLogoPopup {
       // Carrega configurações do botão flutuante
       await this.loadFloatingCaptureSettings();
       
+      // Carrega configurações de privacidade
+      await this.loadPrivacySettings();
+      
       console.log('✅ Popup BuscaLogo inicializado');
       
     } catch (error) {
@@ -117,6 +120,14 @@ class BuscaLogoPopup {
       favoritesStatus: document.getElementById('favoritesStatus'),
       favoritesStatusText: document.getElementById('favoritesStatusText')
     };
+    
+    // Privacy elements
+    this.elements.consentGiven = document.getElementById('consentGiven');
+    this.elements.allowServerConnection = document.getElementById('allowServerConnection');
+    this.elements.allowRemoteSearchRequests = document.getElementById('allowRemoteSearchRequests');
+    this.elements.shareTelemetry = document.getElementById('shareTelemetry');
+    this.elements.savePrivacy = document.getElementById('savePrivacy');
+    this.elements.loadPrivacy = document.getElementById('loadPrivacy');
   }
   
   /**
@@ -144,6 +155,10 @@ class BuscaLogoPopup {
     this.elements.testDatabase.addEventListener('click', () => this.testDatabase());
     this.elements.injectContentScript.addEventListener('click', () => this.injectContentScript());
     this.elements.saveFloatingCaptureSettings.addEventListener('click', () => this.saveFloatingCaptureSettings());
+    
+    // Privacy listeners
+    this.elements.savePrivacy.addEventListener('click', () => this.savePrivacySettings());
+    this.elements.loadPrivacy.addEventListener('click', () => this.loadPrivacySettings());
   }
   
   /**
@@ -506,6 +521,8 @@ class BuscaLogoPopup {
       this.elements.openTestPage.disabled = true;
       this.elements.saveFloatingCaptureSettings.disabled = true;
       this.elements.saveNotificationSettings.disabled = true;
+      this.elements.savePrivacy.disabled = true;
+      this.elements.loadPrivacy.disabled = true;
     } else {
       this.elements.capturePage.disabled = false;
       this.elements.refreshStats.disabled = false;
@@ -517,6 +534,8 @@ class BuscaLogoPopup {
       this.elements.openTestPage.disabled = false;
       this.elements.saveFloatingCaptureSettings.disabled = false;
       this.elements.saveNotificationSettings.disabled = false;
+      this.elements.savePrivacy.disabled = false;
+      this.elements.loadPrivacy.disabled = false;
     }
   }
   
@@ -603,43 +622,53 @@ class BuscaLogoPopup {
   }
   
   /**
-   * Salva configurações de notificação
+   * Carrega configurações de privacidade
    */
-  async saveNotificationSettings() {
+  async loadPrivacySettings() {
     try {
-      console.log('🔔 BuscaLogo: Salvando configurações de notificação...');
-      
-      this.setLoading(true);
-      this.elements.saveNotificationSettings.textContent = '💾 Salvando...';
-      
-      const settings = {
-        enabled: this.elements.notificationsEnabled.checked,
-        newPageCaptured: this.elements.newPageNotifications.checked,
-        crawlingProgress: this.elements.crawlingNotifications.checked,
-        connectionStatus: this.elements.connectionNotifications.checked,
-        showBadge: this.elements.showBadge.checked,
-        showAlreadyCaptured: this.elements.showAlreadyCaptured.checked,
-        showNotCaptured: this.elements.showNotCaptured.checked
-      };
-      
-      const response = await this.sendMessage('UPDATE_NOTIFICATION_SETTINGS', { settings });
-      
-      if (response.success) {
-        console.log('✅ Configurações de notificação salvas:', settings);
-        this.showMessage('Configurações salvas com sucesso!', 'success');
-        
-        // Recarrega as configurações para confirmar
-        await this.loadNotificationSettings();
-      } else {
-        throw new Error(response.error || 'Erro ao salvar configurações');
+      const response = await this.sendMessage('GET_PRIVACY_SETTINGS');
+      if (response && response.success) {
+        const s = response.settings || {};
+        this.elements.consentGiven.checked = !!s.consentGiven;
+        this.elements.allowServerConnection.checked = !!s.allowServerConnection;
+        this.elements.allowRemoteSearchRequests.checked = !!s.allowRemoteSearchRequests;
+        this.elements.shareTelemetry.checked = !!s.shareTelemetry;
+        // Gate UI por consentimento
+        const gated = !s.consentGiven;
+        this.elements.openSearch.disabled = gated;
+        this.elements.openDashboard.disabled = gated;
       }
-      
     } catch (error) {
-      console.error('❌ Erro ao salvar configurações de notificação:', error);
-      this.showMessage('Erro ao salvar configurações: ' + error.message, 'error');
+      console.error('❌ Erro ao carregar privacidade:', error);
+    }
+  }
+  
+  /**
+   * Salva configurações de privacidade
+   */
+  async savePrivacySettings() {
+    try {
+      this.setLoading(true);
+      this.elements.savePrivacy.textContent = '💾 Salvando...';
+      const settings = {
+        consentGiven: this.elements.consentGiven.checked,
+        allowServerConnection: this.elements.allowServerConnection.checked,
+        allowRemoteSearchRequests: this.elements.allowRemoteSearchRequests.checked,
+        shareTelemetry: this.elements.shareTelemetry.checked
+      };
+      const response = await this.sendMessage('UPDATE_PRIVACY_SETTINGS', { settings });
+      if (response.success) {
+        this.showMessage('Preferências de privacidade salvas.', 'success');
+        await this.loadPrivacySettings();
+      } else {
+        throw new Error(response.error || 'Erro ao salvar privacidade');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao salvar privacidade:', error);
+      this.showMessage('Erro ao salvar privacidade: ' + error.message, 'error');
     } finally {
       this.setLoading(false);
-      this.elements.saveNotificationSettings.textContent = '💾 Salvar';
+      this.elements.savePrivacy.textContent = '💾 Salvar Preferências';
     }
   }
   

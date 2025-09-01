@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "BuscaLogo - Buscador Colaborativo P2P",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Extensão que coleta dados das páginas visitadas e permite busca colaborativa via P2P",
   
   "permissions": [
@@ -15,9 +15,7 @@
   
   "host_permissions": [
     "http://*/*",
-    "https://*/*",
-    "ws://localhost:3001/*",
-    "wss://localhost:3001/*"
+    "https://*/*"
   ],
   
   "background": {

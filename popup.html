@@ -433,6 +433,43 @@
     <div class="subtitle">Buscador Colaborativo P2P</div>
   </div>
   
+  <!-- Privacy Notice / Consent -->
+  <div class="notification-settings" id="privacySection">
+    <div class="settings-header">
+      <span class="settings-title">🔒 Privacidade e Consentimento</span>
+    </div>
+    <div class="settings-content">
+      <div class="setting-item">
+        <label class="setting-label">
+          <input type="checkbox" id="consentGiven">
+          Li e concordo com a coleta e processamento local de dados para busca
+        </label>
+      </div>
+      <div class="setting-item">
+        <label class="setting-label">
+          <input type="checkbox" id="allowServerConnection">
+          Permitir conexão com servidor para sinalização e funcionalidades remotas
+        </label>
+      </div>
+      <div class="setting-item">
+        <label class="setting-label">
+          <input type="checkbox" id="allowRemoteSearchRequests">
+          Permitir responder a consultas remotas (compartilhar resultados locais)
+        </label>
+      </div>
+      <div class="setting-item">
+        <label class="setting-label">
+          <input type="checkbox" id="shareTelemetry">
+          Compartilhar métricas anônimas de uso (opcional)
+        </label>
+      </div>
+    </div>
+    <div class="settings-actions">
+      <button class="btn btn-secondary" id="loadPrivacy">Recarregar</button>
+      <button class="btn btn-primary" id="savePrivacy">💾 Salvar Preferências</button>
+    </div>
+  </div>
+  
   <!-- Current Page Info -->
   <div class="current-page" id="currentPageInfo" style="display: none;">
     <div class="current-page-url" id="currentPageUrl">-</div>

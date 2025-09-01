@@ -232,9 +232,19 @@ class BuscaLogoFloatingCapture {
       
       if (response && response.success) {
         if (response.isCaptured) {
-          this.showAlreadyCaptured();
+          // Verifica se deve mostrar notificação de página já capturada
+          if (response.showAlreadyCaptured === true) {
+            this.showAlreadyCaptured();
+          } else {
+            console.log('🎯 BuscaLogo: Configuração desabilita notificação de já capturada - não mostrando nada');
+          }
         } else {
-          this.show();
+          // Verifica se deve mostrar notificação de página não capturada
+          if (response.showNotCaptured === true) {
+            this.show();
+          } else {
+            console.log('🎯 BuscaLogo: Configuração desabilita notificação de não capturada - não mostrando nada');
+          }
         }
       } else {
         // Se não conseguir verificar, mostra por padrão

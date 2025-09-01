@@ -104,7 +104,7 @@ fi
 print_success "Todos os arquivos obrigatórios estão presentes!"
 
 # Criar arquivo ZIP para publicação
-ZIP_NAME="buscalogo-extension-v1.0.0.zip"
+ZIP_NAME="buscalogo-extension-v1.0.1.zip"
 cd "$PUBLISH_DIR"
 
 print_status "Criando arquivo ZIP: $ZIP_NAME"

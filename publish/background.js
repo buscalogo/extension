@@ -44,7 +44,8 @@ class BuscaLogoBackground {
       crawlingProgress: true,
       connectionStatus: true,
       showBadge: true,
-      showAlreadyCaptured: true  // Nova opção para mostrar aviso de página já capturada
+      showAlreadyCaptured: true,  // Nova opção para mostrar aviso de página já capturada
+      showNotCaptured: true       // Nova opção para mostrar aviso de página não capturada
     };
     this.notificationQueue = [];
     this.badgeCount = 0;
@@ -55,6 +56,15 @@ class BuscaLogoBackground {
       autoHide: true,
       showTitle: true,
       hideDelay: 5000
+    };
+    
+    // Configurações de privacidade e consentimento
+    this.privacySettings = {
+      consentGiven: false,
+      consentGivenAt: null,
+      allowServerConnection: false,
+      allowRemoteSearchRequests: false,
+      shareTelemetry: false
     };
     
     console.log('✅ Construtor concluído');
@@ -70,11 +80,17 @@ class BuscaLogoBackground {
     console.log('💾 Storage inicializado');
     await this.loadSavedData();
     console.log('📚 Dados carregados');
+    await this.loadPrivacySettings();
+    console.log('🔒 Configurações de privacidade carregadas');
           await this.loadNotificationSettings();
       console.log('🔔 Configurações de notificação carregadas');
       await this.loadFloatingCaptureSettings();
       console.log('🎯 Configurações do botão flutuante carregadas');
-      await this.connectToServer();
+      if (this.privacySettings && this.privacySettings.allowServerConnection) {
+        await this.connectToServer();
+      } else {
+        console.log('🔒 Conexão com servidor desativada por privacidade');
+      }
     console.log('🔗 Tentativa de conexão com servidor iniciada');
     this.setupMessageHandlers();
     console.log('🎯 Handlers de mensagem configurados');
@@ -88,6 +104,10 @@ class BuscaLogoBackground {
    */
   async connectToServer() {
     try {
+      if (!this.privacySettings || !this.privacySettings.allowServerConnection) {
+        console.log('🔒 Conexão com servidor bloqueada: permissão não concedida');
+        return;
+      }
       console.log('🔗 Tentando conectar ao servidor...');
       
       if (this.serverConnection) {
@@ -220,7 +240,19 @@ class BuscaLogoBackground {
           
         case 'SEARCH_REQUEST':
           console.log('🔍 SEARCH_REQUEST recebido:', { queryId, query, timestamp });
-          this.handleServerSearchRequest(queryId, query);
+          if (this.privacySettings && this.privacySettings.allowRemoteSearchRequests) {
+            this.handleServerSearchRequest(queryId, query);
+          } else {
+            console.log('🔒 Ignorando SEARCH_REQUEST: compartilhamento remoto desativado');
+            // Opcional: responder com erro explícito
+            this.sendToServer({
+              type: 'SEARCH_RESPONSE',
+              queryId: queryId,
+              error: 'remote_search_disabled',
+              peerId: this.peerId,
+              timestamp: Date.now()
+            });
+          }
           break;
           
         case 'PONG':
@@ -252,6 +284,12 @@ class BuscaLogoBackground {
       // Verifica se os parâmetros são válidos
       if (!queryId || !query) {
         console.error('❌ Parâmetros inválidos:', { queryId, query });
+        return;
+      }
+      
+      // Verifica permissão de privacidade
+      if (!this.privacySettings || !this.privacySettings.allowRemoteSearchRequests) {
+        console.warn('🔒 Rejeitando busca remota por configuração de privacidade');
         return;
       }
       
@@ -540,7 +578,8 @@ class BuscaLogoBackground {
             const response = { 
               success: true, 
               isCaptured,
-              showAlreadyCaptured: this.notificationSettings.showAlreadyCaptured
+              showAlreadyCaptured: this.notificationSettings.showAlreadyCaptured,
+              showNotCaptured: this.notificationSettings.showNotCaptured
             };
             console.log('🔍 BuscaLogo: Enviando resposta:', response);
             sendResponse(response);
@@ -597,6 +636,38 @@ class BuscaLogoBackground {
           this.notificationSettings = { ...this.notificationSettings, ...message.data.settings };
           await this.saveNotificationSettings();
           sendResponse({ success: true, settings: this.notificationSettings });
+          return true;
+          
+        case 'GET_PRIVACY_SETTINGS':
+          console.log('🔒 Obtendo configurações de privacidade...');
+          sendResponse({ success: true, settings: this.privacySettings });
+          break;
+          
+        case 'UPDATE_PRIVACY_SETTINGS':
+          console.log('🔒 Atualizando configurações de privacidade...');
+          try {
+            const prev = { ...this.privacySettings };
+            this.privacySettings = { ...this.privacySettings, ...message.data.settings };
+            if (message.data.settings && message.data.settings.consentGiven && !prev.consentGiven) {
+              this.privacySettings.consentGivenAt = new Date().toISOString();
+            }
+            await this.savePrivacySettings();
+            // Garante coerência da conexão com o servidor
+            if (!prev.allowServerConnection && this.privacySettings.allowServerConnection) {
+              await this.connectToServer();
+            } else if (prev.allowServerConnection && !this.privacySettings.allowServerConnection) {
+              if (this.serverConnection) {
+                try { this.serverConnection.close(); } catch (e) {}
+              }
+              this.isConnectedToServer = false;
+              this.stopHeartbeat();
+              await this.notifyConnectionStatus(false);
+            }
+            sendResponse({ success: true, settings: this.privacySettings });
+          } catch (error) {
+            console.error('❌ Erro ao atualizar privacidade:', error);
+            sendResponse({ success: false, error: error.message });
+          }
           return true;
           
         case 'TEST_NOTIFICATION':
@@ -2022,6 +2093,33 @@ class BuscaLogoBackground {
     }
   }
   
+  /**
+   * Carrega configurações de privacidade
+   */
+  async loadPrivacySettings() {
+    try {
+      const result = await chrome.storage.local.get(['privacySettings']);
+      if (result.privacySettings) {
+        this.privacySettings = { ...this.privacySettings, ...result.privacySettings };
+        console.log('🔒 Privacidade carregada:', this.privacySettings);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar configurações de privacidade:', error);
+    }
+  }
+
+  /**
+   * Salva configurações de privacidade
+   */
+  async savePrivacySettings() {
+    try {
+      await chrome.storage.local.set({ privacySettings: this.privacySettings });
+      console.log('💾 Configurações de privacidade salvas');
+    } catch (error) {
+      console.error('❌ Erro ao salvar configurações de privacidade:', error);
+    }
+  }
+
   /**
    * Salva configurações de notificação
    */
